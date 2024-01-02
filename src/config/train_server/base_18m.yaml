@@ -1,0 +1,177 @@
+setting:
+  output_dir: "experiments/cosmo/"
+  src_dir: "./src"
+  add_time_stamp: True # if False, when restart, will know where to resume from (suitable for very long training)
+  resume_from_checkpoint: False
+  prompt_template_name: "cosmo"
+
+
+data_setting:
+  local_prefix: "/" # !!!!! will set to "" if use azfuse
+  train:
+    img_txt_path: >
+      /dataset/laion400m_wds/{00000..00997}.tar;
+      /dataset/cc3m_wds/train/{00000..00329}.tar;
+      /dataset/sbu_wds/{000000000..000000997}.tar
+    inter_img_txt_path: >
+      /dataset/mmc4/core_ff_w_clean_w_rule1_chunk_wds/chunk0/{000000000..000000975}.tar;
+      /dataset/mmc4/core_ff_w_clean_w_rule1_chunk_wds/chunk1/{000000000..000000970}.tar;
+      /dataset/mmc4/core_ff_w_clean_w_rule1_chunk_wds/chunk2/{000000000..000001019}.tar;
+      /dataset/mmc4/core_ff_w_clean_w_rule1_chunk_wds/chunk3/{000000000..000001578}.tar
+    vid_txt_wds_path: >
+      /dataset/webvid2_5m/train/{000000000..00002487}.tar
+    vid_txt_tsv_path: >
+      /dataset/webvid2_5m/train_annotations/train_combined_224.tsv
+    inter_vid_txt_wds_path: >
+      /dataset/howto100m_wds/200k/{000000000..000000263}.tar
+    inter_vid_txt_tsv_path: >
+
+    instr_path:
+      ""
+    
+  eval:
+    img_txt_path: >
+      /dataset/laion400m_wds/{00998..00999}.tar;
+      /dataset/cc3m_wds/train/{00330..00331}.tar;
+      /dataset/sbu_wds/{000000998..000000999}.tar;
+      /dataset/coco2014_wds/{000000678..000000680}.tar;
+      /dataset/vg_wds/{000000920..000000922}.tar
+    inter_img_txt_path: >
+      /dataset/mmc4/core_ff_w_clean_w_rule1_chunk_wds/chunk0/{000000976..000000978}.tar;
+      /dataset/mmc4/core_ff_w_clean_w_rule1_chunk_wds/chunk1/{000000971..000000972}.tar;
+      /dataset/mmc4/core_ff_w_clean_w_rule1_chunk_wds/chunk2/{000001020..000001021}.tar;
+      /dataset/mmc4/core_ff_w_clean_w_rule1_chunk_wds/chunk3/{000001579..000001582}.tar
+    vid_txt_wds_path: >
+      /dataset/webvid2_5m/val_5000_each/{000000000..000000000}.tar
+    vid_txt_tsv_path: >
+      /dataset/webvid2_5m/val_annotations/val_w_combined_224.tsv
+    inter_vid_txt_wds_path: >
+      /dataset/howto100m_wds/200k/{000000264..000000264}.tar    
+    inter_vid_txt_tsv_path: >
+
+    instr_path:
+      ""
+    
+dataset_params:
+  use_azfuse: False # <----------------!!!!!!! Modfify this line!!!!!!!!!---------------->
+  split_data_by_node: True # !!!!!
+  sampling_strategy: "min" # round_robin, min, max, 
+  upload_model_to_blob: True # !!!!!
+  img_txt:
+    use_img_txt: True
+    clean_data_use_strategy: "noisy_only" # clean_only, clean_first, clean_last, clean_random, noisy_only, mixed: 50% clean, 50% noisy    
+    tar_pre_cache: False # if true, download all tar files to local disk before training. Otherwise, download tar files on the fly
+    pre_cache_ratio: 0.25 # if tar_pre_cache is True, only download 10% of tar files
+  inter_img_txt:
+    use_inter_img_txt: True
+    MIN_KB: 10 # reject image smaller than 10KB
+    MAX_IMAGE_PIXELS: 1000000000
+    MAX_NUM_TOKENS_MMC4: 128  # max length of text token, 256 in flamingo (with larger memory)
+    MAX_NUM_TOKENS_CC3M: 128  # max length of text token, 256 in flamingo (with larger memory)
+    MAX_NUM_TOKENS_OBELICS: 128  # max length of text token, 256 in flamingo (with larger memory)
+    MAX_NUM_IMAGES_MMC4: 3  # images num in each interlevel image_text pairs, 5 in flamingo
+    MAX_NUM_IMAGES_CC3M: 3
+    MAX_NUM_IMAGES_OBELICS: 3  # 50%+ obelics only have 1 images
+    SIM_THRESHOLD_MMC4: 0.25
+    SIM_THRESHOLD_OBELICS: 0.25
+    TINY_IMAGE_SIZE_THRESHOLD: 1
+    N_CHANNELS: 3
+    INTERLEAVED_IMAGE_SIZE: 224
+    clean_data_use_strategy: "noisy_only"    #low_simlarity clean_only, clean_first, clean_last, clean_random, noisy_only, mixed: 50% clean, 50% noisy
+    interlevel_text_coherence: False # If True, sample MAX_NUM_TOKENS token from adjacent text; If False, sample K images and their matched text
+    balanced_sampling: False # If true, sample K images and K texts possibly, for obelics
+    tar_pre_cache: False # if true, download all tar files to local disk before training. Otherwise, download tar files on the fly
+    pre_cache_ratio: 0.25 # if tar_pre_cache is True, only download 10% of tar files
+  vid_txt:
+    use_vid_txt: False
+    VIDEO_IMAGE_SIZE: 224
+    VIDEO_FRAMES: 3
+    clean_data_use_strategy: "noisy_only" # clean_only, clean_first, clean_last, clean_random, noisy_only, mixed: 50% clean, 50% noisy
+    MAX_SAMPLES: -1 # 500000, use 0.5M video-text pair at most, -1 for use all dataset
+    tar_pre_cache: False # if true, download all tar files to local disk before training. Otherwise, download tar files on the fly
+    read_mode: "wds" # tsv, wds  # <----------------!!!!!!! Modfify this line!!!!!!!!!---------------->
+    pre_cache_ratio: 0.25 # if tar_pre_cache is True, only download 10% of tar files
+  inter_vid_txt:
+    use_inter_vid_txt: False
+    VIDEO_IMAGE_SIZE: 224
+    VIDEO_SAMPLED_CLIPS: 3
+    MAX_SAMPLES: -1 # 500000, use 0.5M video-text pair at most, -1 for use all dataset
+    MAX_NUM_TOKENS: 128  # max length of text token, 256 in flamingo (with larger memory)
+    VIDEO_FRAMES: 3
+    read_mode: "wds" # tsv, wds  tsv downloaded from blob cache
+    clean_data_use_strategy: "noisy_only" # clean_only, clean_first, clean_last, clean_random, noisy_only, mixed: 50% clean, 50% noisy
+    tar_pre_cache: False # if true, download all tar files to local disk before training. Otherwise, download tar files on the fly
+    pre_cache_ratio: 0.25 # if tar_pre_cache is True, only download 10% of tar files
+
+model_params:
+  vision_encoder:
+    vision_encoder_name: "clip" # clip/sam/sparseformer
+    vision_encoder_arch: "ViT-L-14"
+    tuning: False
+    vision_encoder_pretrained: "openai"
+    ckpt_path: ""
+    cache_dir: "/pretrained_models"
+    custom_augment: True # custom augmentation is much stronger than the default one
+  lang_model:
+    name: "opt-iml-max-1.3b"
+    lang_model_path: "/pretrained_models/opt-iml-max-1.3b"
+    tokenizer_path: "/pretrained_models/opt-iml-max-1.3b"
+    dim: 512
+    num_tokens: 512
+    unimodal_depth: 12
+    interval_layer: 1
+    use_memory_layer: False # if True, add 1 memory layer after unimodal layer, but require faiss library
+    
+  multimodality_model:
+    latent_dim: 512 # latent space for contrastive learning
+    use_contrastive_loss: True
+    contrastive_temperature: 0.2
+    contrastive_loss_weight: 1.0
+    contrastive_gather_way: "single_gpu" # "single_node", "all_nodes", "single_gpu"
+    cross_attention_compress_ratio: 1 # compress self-attention and feedforward layer in CrossAttention module
+    only_attend_immediate_media: True # if True, only attend to immediate media in CrossAttention module
+    # set to False for obelics
+    qv_norm: False # if True, normalize q and v in CrossAttention module
+
+training_params:
+  float_type: "fp16" # fp16, fp32, bf16
+  optim: "adamw_hf" # replace by deepspeed config file
+  micro_batch_size: 64
+  workers: 4 # workers per GPU
+  num_epochs: 20
+  lr_scheduler_type: "cosine"
+  learning_rate: 0.0003
+  cutoff_len: 256
+  warmup_steps: 500 # prior than warmup_ratio
+  warmup_ratio: 0.03
+  logging_steps: 200 # do not set it too small, otherwise it will slow down the training (due to the overhead of logging)
+  save_steps: 5000
+  save_total_limit: 3
+  # the following for validation
+  eval_steps: 500
+  eval: True # if evaluate
+  max_eval_batches: 500
+  data_weights:
+    img_txt: 2
+    vid_txt: 1
+    inter_img_txt: 2
+    inter_vid_txt: 2
+  exception_handling: False # if True, the training will not stop when exception occurs
+  ignore_data_skip: True # if False, when resume from checkpoint, need to iteration all dataloader until reach the last iteration (exception)
+  data_resampling: False # when use tsv, will set to True auto
+  custom_dist_init_group_timeout: 6000 # 6000s = 100min
+
+lora_params:
+  lora: False
+  lora_r: 8
+  lora_alpha: 16
+  lora_dropout: 0.05
+  lora_target_modules: ["q_proj", "v_proj"]
+
+wandb_params:
+  wandb: True # True for use, False for not use
+  wandb_project: "cosmo"
+  wandb_run_name: "18m-baseline-opt-iml-1.3b"
+  wandb_watch: "all"
+  wandb_log_model: ""
+  wandb_dir: "/experiments/cosmo/wandb_logs/"

@@ -1,0 +1,108 @@
+setting:
+  output_dir: "/home/jinpeng/blob/vigstandard_data/v-jinpewang/experiments/cosmo/"
+  src_dir: "./src"
+  add_time_stamp: True # if False, when restart, will know where to resume from (suitable for very long training)
+  resume_from_checkpoint: False
+  prompt_template_name: "cosmo"
+
+
+data_setting:
+  local_prefix: "/home/jinpeng/blob/vigstandard_data/v-jinpewang" # !!!!! will set to "" if use azfuse
+  train:
+    img_instruct: >
+      /dataset/instruction_tuning_data/ShareGPT4V/1000_coco.json
+    vid_instruct: >
+
+  eval:
+    img_instruct: >
+      /dataset/instruction_tuning_data/ShareGPT4V/1000_coco_subset2.json
+    vid_instruct: >
+
+dataset_params:
+  use_azfuse: True # <----------------!!!!!!! Modfify this line!!!!!!!!!---------------->
+  split_data_by_node: False # !!!!!
+  sampling_strategy: "min" # round_robin, min, max, 
+  upload_model_to_blob: True # !!!!!
+  fine_tuning: True # false for pretrain, true for fine-tuning
+  img_instruct:
+    use_img_instruct: True
+    MAX_SAMPLES: -1
+    MAX_NUM_TOKENS: 128
+    DATA_ROOT: "/home/jinpeng/blob/vigstandard_data/xiyin1wu2_maskrcnn/data/datasets/"
+  vid_instruct:
+    use_vid_instruct: False
+    VIDEO_IMAGE_SIZE: 224
+    MAX_NUM_TOKENS: 128
+    VIDEO_FRAMES: 4
+    DATA_ROOT: "/home/jinpeng/blob/vigstandard_data/xiyin1wu2_maskrcnn/data/datasets/"
+
+model_params:
+  vision_encoder:
+    vision_encoder_name: "clip" # clip/sam/sparseformer
+    vision_encoder_arch: "ViT-L-14"
+    tuning: False
+    vision_encoder_pretrained: "openai"
+    ckpt_path: ""
+    cache_dir: "/home/jinpeng/blob/vigstandard_data/v-jinpewang/pretrained_models"
+    custom_augment: True # custom augmentation is much stronger than the default one
+  lang_model:
+    name: "opt-iml-max-1.3b"
+    lang_model_path: "/home/jinpeng/blob/vigstandard_data/v-jinpewang/pretrained_models/opt-iml-max-1.3b"
+    tokenizer_path: "/home/jinpeng/blob/vigstandard_data/v-jinpewang/pretrained_models/opt-iml-max-1.3b"
+    dim: 512
+    num_tokens: 512
+    unimodal_depth: 12
+    interval_layer: 2
+    use_memory_layer: False # if True, add 1 memory layer after unimodal layer, but require faiss library
+    
+  multimodality_model:
+    latent_dim: 512 # latent space for contrastive learning
+    use_contrastive_loss: True
+    contrastive_temperature: 0.2
+    contrastive_loss_weight: 1.0
+    contrastive_gather_way: "single_gpu" # "single_node", "all_nodes", "single_gpu"
+    cross_attention_compress_ratio: 2 # compress self-attention and feedforward layer in CrossAttention module
+    only_attend_immediate_media: True # if True, only attend to immediate media in CrossAttention module
+    # set to False for obelics
+    qv_norm: False # if True, normalize q and v in CrossAttention module
+
+training_params:
+  optim: "adamw_hf" # replace by deepspeed config file
+  micro_batch_size: 4
+  workers: 4 # workers per GPU
+  num_epochs: 20
+  lr_scheduler_type: "cosine"
+  learning_rate: 0.0005
+  cutoff_len: 256
+  warmup_steps: 500 # prior than warmup_ratio
+  warmup_ratio: 0.03
+  logging_steps: 200 # do not set it too small, otherwise it will slow down the training (due to the overhead of logging)
+  save_steps: 5000
+  save_total_limit: 10
+  # the following for validation
+  eval_steps: 500
+  eval: True # if evaluate
+  max_eval_batches: 500
+  data_weights:
+    img_txt: 2
+    vid_txt: 1
+    inter_img_txt: 2
+    inter_vid_txt: 2
+  exception_handling: False # if True, the training will not stop when exception occurs
+  ignore_data_skip: True # if False, when resume from checkpoint, need to iteration all dataloader until reach the last iteration (exception)
+  data_resampling: False # when use tsv, will set to True auto
+
+lora_params:
+  lora: False
+  lora_r: 8
+  lora_alpha: 16
+  lora_dropout: 0.05
+  lora_target_modules: ["q_proj", "v_proj"]
+
+wandb_params:
+  wandb: True # True for use, False for not use
+  wandb_project: "cosmo"
+  wandb_run_name: "cosmo-tuning"
+  wandb_watch: "all"
+  wandb_log_model: ""
+  wandb_dir: "/storage/v-jinpewang/experiments/cosmo/wandb_logs/"

@@ -1,0 +1,30 @@
+model_name: "cosmo"
+deepspeed_config: "src/config/deepspeed/deepspeed_config_eval.json"
+
+# this for evaluation
+general:
+  data_root: "/Data"
+  num_samples: 5000
+  query_set_size: 2048
+  batch_size: 1
+  ckpt_path: "laion400m_raw_images_mmc4_webdataset_format_v2_custom_w_rule1_webvid2_5m_annotations/2023-07-12_08-32-56/checkpoint-40000/pytorch_model.bin"
+
+model_params:
+  vision_encoder:
+    vision_encoder_name: "clip" # clip/sam
+    sam_vision_encoder_path: "sam-base"
+    clip_vision_encoder_path: "ViT-L-14"
+    clip_vision_encoder_pretrained: "openai"
+    cache_dir: "pretrained_models"
+  lang_model:
+    lang_model_path: "pretrained_models/opt-1.3b"
+    tokenizer_path: "pretrained_models/opt-1.3b"
+    dim: 512
+    num_tokens: 512
+    unimodal_depth: 12
+    multimodal_depth: 12
+  multimodality_model:
+    latent_dim: 512 # latent space for contrastive learning
+    use_contrastive_loss: True
+    contrastive_temperature: 0.1
+    contrastive_loss_weight: 1.0

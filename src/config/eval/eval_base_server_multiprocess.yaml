@@ -1,0 +1,216 @@
+model_name: "cosmo"
+deepspeed_config: "src/config/deepspeed/deepspeed_config_eval.json"
+
+# this for evaluation
+general:
+  data_root: "/dataset/downstream_datasets"
+  shots: [0, 4, 8, 16, 32]
+  num_trials: 1
+  trial_seeds: [42]
+  num_samples: 5000 # 5000 is close to full evaluation
+  query_set_size: 2048
+  batch_size: 16
+  seed: 42
+  device: 3
+  ckpt_path: "laion400m_sbu_wds_mmc4_chunk3_webvid2_5m_webvid2_5m/2023-08-07_04-20-21/checkpoint-35000/pytorch_model.bin" # modify this line to specify the path of the trained model
+
+model_params:
+  vision_encoder:
+    vision_encoder_name: "clip" # clip/sam/sparseformer
+    vision_encoder_arch: "ViT-L-14"
+    tuning: False
+    vision_encoder_pretrained: "openai"
+    ckpt_path: ""
+    cache_dir: "/storage/v-jinpewang/pretrained_models"
+    custom_augment: True # custom augmentation is much stronger than the default one
+  lang_model:
+    name: "opt-iml-max-1.3b"
+    lang_model_path: "/pretrained_models/opt-iml-max-1.3b"
+    tokenizer_path: "/pretrained_models/opt-iml-max-1.3b"
+    dim: 512
+    num_tokens: 512
+    unimodal_depth: 12
+    interval_layer: 1
+    use_memory_layer: False # if True, add 1 memory layer after unimodal layer, but require faiss library
+    
+  multimodality_model:
+    latent_dim: 512 # latent space for contrastive learning
+    use_contrastive_loss: True
+    contrastive_temperature: 0.2
+    contrastive_loss_weight: 1.0
+    contrastive_gather_way: "single_gpu" # "single_node", "all_nodes", "single_gpu"
+    cross_attention_compress_ratio: 1 # compress self-attention and feedforward layer in CrossAttention module
+    only_attend_immediate_media: True # if True, only attend to immediate media in CrossAttention module
+    qv_norm: False # if True, normalize q and v in CrossAttention module
+
+    
+# adding more tasks here
+tasks:
+  - name: "captioning"
+    datasets: ["coco", "flickr"] # "coco", "flickr"
+    params:
+      num_beams: 5
+      length_penalty: -2.0
+      max_generation_length: 20
+  - name: "vqa"
+    datasets: ["vqav2", "ok-vqa", "textvqa", "vizwiz"] # "vqav2", "ok-vqa", "textvqa", "vizwiz"
+    params:
+      max_generation_length: 5
+      num_beams: 5
+      length_penalty: -2.0
+  - name: "imageclassification"
+    datasets: ["hatefulmemes"] # "hatefulmemes"
+    params:
+  - name: "retrieval"
+    datasets: ["coco", "flickr"] # "coco", "flickr"
+    params:
+  - name: "video_vqa"
+    datasets: [] # "msvd_qa", "msrvtt_qa", "tgif_qa"
+    params:
+      num_beams: 5
+      length_penalty: -2.0
+      max_generation_length: 20
+  - name: "video_captioning"
+    datasets: [] # "youcook2" "vatex", "tvc", "msrvtt"
+    params:
+      num_beams: 5
+      length_penalty: -2.0
+      max_generation_length: 20
+  - name: "zs_classification"
+    datasets: [] # include 38 datasets
+    params:
+  - name: "video_mc"
+    datasets: [] #"tgif_mc_transition"
+    params:
+      num_beams: 5
+      length_penalty: -2.0
+      max_generation_length: 10
+# adding more datasets here
+# modify the following lines to specify the path of the datasets
+datasets:
+  # =================================Captioning&&Retrieval==============================================
+  coco:
+    train_image_dir_path: "OK-VQA/train2014"
+    val_image_dir_path: "OK-VQA/val2014"
+    karpathy_json_path: "kaggle_karpathy_captioning/dataset_coco.json"
+    annotations_json_path: "coco/annotations_2014/captions_val2014.json"
+    ret_image_dir_path: "OK-VQA"
+    ret_val_annotations_json_path: "coco/annotations_2014/coco_karpathy_val.json"
+    ret_test_annotations_json_path: "coco/annotations_2014/coco_karpathy_test.json"
+
+  flickr:
+    image_dir_path: "flickr30k/flickr30k-images"
+    karpathy_json_path: "flickr30k/dataset_flickr30k.json"
+    annotations_json_path: "flickr30k/dataset_flickr30k_coco_style.json" # flickr30k/dataset_flickr30k_coco_style.json
+    ret_image_dir_path: "flickr30k"
+    ret_val_annotations_json_path: "flickr30k/flickr30k_val.json"
+    ret_test_annotations_json_path: "flickr30k/flickr30k_test.json"
+
+
+  # ==========================================VQA==============================================
+  vqav2:
+    train_image_dir_path: "OK-VQA/train2014"
+    train_questions_json_path: "VQAV2/v2_OpenEnded_mscoco_train2014_questions.json"
+    train_annotations_json_path: "VQAV2/v2_mscoco_train2014_annotations.json"
+    test_image_dir_path: "OK-VQA/val2014"
+    test_questions_json_path: "VQAV2/v2_OpenEnded_mscoco_val2014_questions.json"
+    test_annotations_json_path: "VQAV2/v2_mscoco_val2014_annotations.json"
+  
+  ok-vqa:
+    train_image_dir_path: "OK-VQA/train2014"
+    train_questions_json_path: "OK-VQA/OpenEnded_mscoco_train2014_questions.json"
+    train_annotations_json_path: "OK-VQA/mscoco_train2014_annotations.json"
+    test_image_dir_path: "OK-VQA/val2014"
+    test_questions_json_path: "OK-VQA/OpenEnded_mscoco_val2014_questions.json"
+    test_annotations_json_path: "OK-VQA/mscoco_val2014_annotations.json"
+
+  textvqa:
+    train_image_dir_path: "textvqa/train_images"
+    train_questions_json_path: "textvqa/train_questions_vqa_format.json"
+    train_annotations_json_path: "textvqa/train_annotations_vqa_format.json"
+    test_image_dir_path: "textvqa/train_images"
+    test_questions_json_path: "textvqa/val_questions_vqa_format.json"
+    test_annotations_json_path: "textvqa/val_annotations_vqa_format.json"
+  
+
+  vizwiz:
+    train_image_dir_path: "VizWiz/train"
+    train_questions_json_path: "VizWiz/train_questions_vqa_format.json"
+    train_annotations_json_path: "VizWiz/train_annotations_vqa_format.json"
+    test_image_dir_path: "VizWiz/val"
+    test_questions_json_path: "VizWiz/val_questions_vqa_format.json"
+    test_annotations_json_path: "VizWiz/val_annotations_vqa_format.json"
+
+# ==========================================VideoVQA==============================================
+  msvd_qa:
+    video_dir_path: "msvd/videos/"
+    annotations_path: "msvd/annotations"
+    test_annotations_json_path: "msvd_test_qa_encode.json"
+    val_annotations_json_path: "msvd_val_qa_encode.json"
+  
+  msrvtt_qa:
+    video_dir_path: "msrvtt/videos/"
+    annotations_path: "msrvtt/annotations"
+    test_annotations_json_path: "msrvtt_qa_test_w_id.jsonl"
+    val_annotations_json_path: "msrvtt_qa_val_w_id.jsonl"
+
+  tgif_qa:
+    video_dir_path: "tgif/gifs/"
+    annotations_path: "tgif/annotations"
+
+  # ===========================================VideoCaptioning==============================================
+  youcook2:
+    video_dir_path: "/storage/xiyin1wu2_maskrcnn/data/datasets/YouCook2"
+    train_annotations_json_path: "YouCook2/annotations/train_w_id_coco_style_data.json"
+    test_annotations_json_path: "YouCook2/annotations/test_w_id_coco_style_data.json"
+    val_annotations_json_path: "YouCook2/annotations/validation_w_id_coco_style_data.json"
+
+  vatex:
+    video_dir_path: "/storage/xiyin1wu2_maskrcnn/data/datasets/VATEX/raw_videos"
+    train_annotations_json_path: "vatex/annotations/train_w_id_coco_style_data.json"
+    test_annotations_json_path: "vatex/annotations/public_test_w_id_coco_style_data.json"
+    val_annotations_json_path: "vatex/annotations/validation_w_id_coco_style_data.json"
+
+  tvc:
+    video_dir_path: "/storage/xiyin1wu2_maskrcnn/data/datasets/TVC/videos/"
+    train_annotations_json_path: "tvc/annotations/train_w_id_coco_style_data.json"
+    test_annotations_json_path: "tvc/annotations/public_test_w_id_coco_style_data.json"
+    val_annotations_json_path: "tvc/annotations/validation_w_id_coco_style_data.json"
+
+  msrvtt:
+    video_dir_path: "/storage/xiyin1wu2_maskrcnn/data/datasets/MSRVTT-v2/videos/"
+    train_annotations_json_path: "msrvtt/annotations/train_w_id_coco_style_data.json"
+    test_annotations_json_path: "msrvtt/annotations/public_test_w_id_coco_style_data.json"
+    val_annotations_json_path: "msrvtt/annotations/validation_w_id_coco_style_data.json"
+
+  msvd:
+    video_dir_path: "/storage/xiyin1wu2_maskrcnn/data/datasets/MSVD/videos/"
+    train_annotations_json_path: "msvd/annotations/train_w_id_coco_style_data.json"
+    test_annotations_json_path: "msvd/annotations/test_w_id_coco_style_data.json"
+    val_annotations_json_path: "msvd/annotations/validation_w_id_coco_style_data.json"
+  # ==========================================Classification==============================================  
+  imagenet:
+    root: "/tmp"
+
+  hatefulmemes:
+    image_dir_path: "HatefulMemes/img"
+    train_annotations_json_path: "HatefulMemes/train.jsonl"
+    test_annotations_json_path: "HatefulMemes/test_seen.jsonl"
+
+  # ==========================================Zero-shot Classification==============================================
+  # this setting include 38 datasets, also task include retrieval, classification,
+  datacomp:
+    image_dir_path: "/datacomp_classification_datasets"
+
+  # ==========================================Video Multiple Choice==============================================
+  tgif_mc_action:
+    video_dir_path: "tgif/gifs/"
+    annotations_path: "tgif/annotations"
+    test_annotations_json_path: "action_test_w_id.json"
+    val_annotations_json_path: "action_val_w_id.json"
+  
+  tgif_mc_transition:
+    video_dir_path: "tgif/gifs/"
+    annotations_path: "tgif/annotations"
+    test_annotations_json_path: "transition_test_w_id.json"
+    val_annotations_json_path: "transition_val_w_id.json"
