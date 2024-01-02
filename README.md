@@ -1,9 +1,15 @@
 <img src="figures/cosmo_logo.png" alt="CosMo" width="50"/> CosMo
 
+[Paper Link](https://arxiv.org/pdf/2401.00849.pdf),
+[Model Link](),
+[Dataset Link]()
+
 
 ![](figures/motivation.png)
 
-- Cosmo is an integrated pre-training framework designed for both image and video processing. It emphasizes on In-context Learning.
+- <p style="color: pink;">Cosmo, a fully open-source and comprehensive pre-training framework, is meticulously crafted for image and video processing.</p>
+Its primary focus lies on In-context Learning.
+
 
 ## Functionality of This Code
 - Provides an Interleaved Image/Video Dataloader.
