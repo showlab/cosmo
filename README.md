@@ -1,4 +1,4 @@
-<img src="figures/cosmo_logo.png" alt="CosMo" width="30"/> CosMo
+<img src="figures/cosmo_logo.png" alt="CosMo" width="50"/> CosMo
 
 
 ![](figures/motivation.png)
@@ -44,11 +44,11 @@ See [TUNING.md](TUNING.md)
 If you find our work helps, please consider cite the following work
 
 ```
-@article{wang2023cosmo,
+@article{wang2024cosmo,
   title={COSMO: Contrastive Streamlined Multimodal Model with Interleaved Pre-Training},
   author={Wang, Alex Jinpeng and Li, Linjie and Lin, Kevin Qinhong and Wang Jianfeng and Lin, Kevin and Yang, Zhengyuan  and Wang, Lijuan and Shou, Mike Zheng},
-  journal={Arxiv},
-  year={2023}
+  journal={arXiv preprint arXiv:2401.00849},
+  year={2024}
 }
 ```
 
