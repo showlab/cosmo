@@ -22,11 +22,33 @@ MMC4/000000.tar,
 ...
 MMC4/001244.tar
 ```
+
 ## Image-text Data
+Please follow [TL;DR]()
 
 ## Interleaved Image-text Data
 ### MMC4
 
+
 ```bash
 python src/utils/count_webdataset_sample.py --data_dir /datadrive_d/jinpeng/Code/videogpt4/datas/raw/mmc4/subdir
 ```
+
+
+
+## Video-text Data
+For the video-text data, we mainly use webvid dataset.
+Please download raw video from [here](https://github.com/m-bain/webvid).
+Then transform the data into webdataset format via:
+
+```
+data_preprocess/convert_webvid_to_wds.py
+```
+
+
+## Interleaved Video-text Data
+
+Download Interleaved Video-text Dataset from [here]().
+
+## Downstream Tasks
+
