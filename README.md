@@ -27,6 +27,9 @@ Its primary focus lies on In-context Learning.
 See [MODEL_CARD.md](MODEL_CARD.md).
 
 
+## HowToInterlink7M Dataset
+See [HowToInterlink7M.md](HowToInterlink7M.md).
+
 ## Install
 See [INSTALL.md](INSTALL.md).
 
