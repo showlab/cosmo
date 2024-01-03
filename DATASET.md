@@ -6,7 +6,7 @@
 ||Video-Text|WebVid2.5M|
 ||Interleaved Image-Text|CC3M|
 ||Interleaved Video-Text|Howto-Interlin7M|
-|Few-shot Evluation|Image Captioning|COCO,FLICKR30K|
+|Few-shot Evaluation|Image Captioning|COCO,FLICKR30K|
 ||Image QA|OK-VQA,VIZWIZ,VQA-V2,TextVQA|
 ||Image Classification|HatefulMems,DataComp|
 ||Image Retrieval|DataComp|
@@ -24,7 +24,7 @@ MMC4/001244.tar
 ```
 
 ## Image-text Data
-Please follow [TL;DR]()
+Please follow [TL;DR](https://openaccess.thecvf.com/content/ICCV2023/papers/Wang_Too_Large_Data_Reduction_for_Vision-Language_Pre-Training_ICCV_2023_paper.pdf) to cluster and select samples.
 
 ## Interleaved Image-text Data
 ### MMC4
