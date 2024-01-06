@@ -1,4 +1,6 @@
-<img src="figures/cosmo_logo.png" alt="CosMo" width="50"/> CosMo
+<img src="figures/cosmo_logo.png" alt="CosMo" width="50"/> 
+
+# CosMo
 
 [Paper Link](https://arxiv.org/pdf/2401.00849.pdf),
 [Model Link](https://huggingface.co/Awiny),

@@ -1,0 +1,14 @@
+model_architecture:
+  version: "" #_v0, "_v3" default
+
+load_model:
+  version: "" # _v4
+
+vision_model_helper:
+  version: ""
+
+language_model_helper:
+  version: "" # _v1, "" default
+
+language_model:
+  version: "" # _v1, "" default
