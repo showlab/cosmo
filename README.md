@@ -29,6 +29,7 @@ Its primary focus lies on In-context Learning.
 - Incorporates contrastive loss.
 - Enables few-shot evaluation.
 - Supports instruction tuning.
+- Scaline from 2B model to 56B.
 
 
 ## Model Card
