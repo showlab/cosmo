@@ -14,7 +14,9 @@ CosMo = getattr(model_module, 'CosMo')
 def create_cosmo(
     model_params: dict,
     lora_params: dict,
-    **videogpt4_kwargs,
+    instruction_tuning: bool = False,
+    device: str = None,
+    **cosmo_kwargs,
 ):
     """
     Initialize a videogpt4 model from a pretrained vision encoder and language encoder.
@@ -52,7 +54,7 @@ def create_cosmo(
                                                                 ckpt_path=ckpt_path,
                                                                 cache_dir=cache_dir,
                                                                 custom_augment=custom_augment,
-                                                                **videogpt4_kwargs
+                                                                **cosmo_kwargs
                                                                 )
     # Ablation study, unfree sparseformer
     if vision_encoder_tuning:
@@ -70,7 +72,9 @@ def create_cosmo(
                                                      use_memory_layer=use_memory_layer,
                                                      only_attend_immediate_media=only_attend_immediate_media,
                                                      qv_norm=qv_norm,
-                                                     **videogpt4_kwargs
+                                                     instruction_tuning=instruction_tuning,
+                                                     device=device,
+                                                     **cosmo_kwargs
                                                      )
     # use lora to tune the language model, lora will auto freeze the language model besides lora parameters
     if lora_params is not None and lora_params["lora"]:
@@ -104,20 +108,32 @@ def create_cosmo(
         vision_encoder_name=vision_encoder_name,
         contrastive_gather_way=contrastive_gather_way,
         qv_norm=qv_norm,
-        **videogpt4_kwargs,
+        **cosmo_kwargs,
     )
 
-    # # Unfreeze perceiver, gated_cross_attn_layers, and LM input embeddings
-    if model.perceiver is not None:
-        model.perceiver.requires_grad_(True)
-        print("Unfreeze perceiver")
-    print("Unfreeze gated_cross_attn_layers")
-    model.lang_model.gated_cross_attn_layers.requires_grad_(True)
-    print("Unfreeze LM input embeddings")
-    model.lang_model.get_input_embeddings().requires_grad_(True)
-    if model.lang_model.memory_layer is not None:
-        print("Unfreeze memory layer")
-        model.lang_model.memory_layer.requires_grad_(True)
+    if instruction_tuning:
+        print("Tuning lora parameters only")
+        model.perceiver.requires_grad_(False)
+        print("Unfreeze LM input embeddings")
+        model.lang_model.get_input_embeddings().requires_grad_(True)
+        # optionally unfreeze other layer
+        if model.perceiver is not None:
+            model.perceiver.requires_grad_(True)
+            print("Unfreeze perceiver")
+        print("Unfreeze gated_cross_attn_layers")
+        model.lang_model.gated_cross_attn_layers.requires_grad_(True)
+    else:
+        # # Unfreeze perceiver, gated_cross_attn_layers, and LM input embeddings
+        if model.perceiver is not None:
+            model.perceiver.requires_grad_(True)
+            print("Unfreeze perceiver")
+        print("Unfreeze gated_cross_attn_layers")
+        model.lang_model.gated_cross_attn_layers.requires_grad_(True)
+        # print("Unfreeze LM input embeddings")
+        # model.lang_model.get_input_embeddings().requires_grad_(True)
+        if model.lang_model.memory_layer is not None:
+            print("Unfreeze memory layer")
+            model.lang_model.memory_layer.requires_grad_(True)
 
     print("learnable parameters: ")
     for p in model.named_parameters():
@@ -126,7 +142,7 @@ def create_cosmo(
     trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
     all_params = sum(p.numel() for p in model.parameters())
     print('*'*80)
-    print(f"VideoGPT4 model initialized with {format_num(trainable_params)}/{format_num(all_params)} trainable parameters")
+    print(f"CosMo model initialized with {format_num(trainable_params)}/{format_num(all_params)} trainable parameters")
     print('*'*80)
     video_processor = None
     return model, image_processor, video_processor, text_tokenizer

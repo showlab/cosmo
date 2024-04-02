@@ -1,0 +1,26 @@
+model_params:
+  lang_model:
+    name: "mixtral-7x8b"
+    lang_model_path: "/tmp/pretrained_models/Mixtral-8x7B-v0.1"
+    tokenizer_path: "/tmp/pretrained_models/Mixtral-8x7B-v0.1"
+    dim: 512
+    num_tokens: 512
+    unimodal_depth: 16 # 32 layers in total
+    interval_layer: 4
+
+  multimodality_model:
+    cross_attention_compress_ratio: 4 # compress self-attention and feedforward layer in CrossAttention module
+
+
+training_params:
+  micro_batch_size: 32
+  learning_rate: 0.00005
+
+
+wandb_params:
+  wandb: True # True for use, False for not use
+  wandb_project: "cosmo"
+  wandb_run_name: "180m-baseline-mixtral-7x8b"
+  wandb_watch: "all"
+  wandb_log_model: ""
+  wandb_dir: "experiments/cosmo/wandb_logs/"

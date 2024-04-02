@@ -682,3 +682,30 @@ class EvalModel(BaseEvalModel):
     
     def get_hateful_memes_prompt(self, text, label=None) -> str:
         return f"<image>is an image with: '{text}' written on it. Is it hateful? Answer:{label if label is not None else ''}{'<|endofchunk|>' if label is not None else ''}"
+
+    def idelics_vqa_prompt(self, question, answer=None) -> str:
+        return f"<visual><human> Question:{question} \n Answer the question using a single word or phrase. <gpt> Answer:{answer if answer is not None else ''}{'<|endofchunk|>' if answer is not None else ''}"
+    
+    def idelics_vqa_prefix_prompt(self):
+        prefix_prompt = ""
+        return prefix_prompt
+
+    def idelics_vizwiz_vqa_prompt(self, question, answer=None) -> str:
+        return f"<visual><human> Question:{question} \nWhen the provided information is insufficient, respond with 'Unanswerable'.\nAnswer the question using a single word or phrase.  <gpt> Answer:{answer if answer is not None else ''}{'<|endofchunk|>' if answer is not None else ''}"
+    
+    def idelics_vizwiz_vqa_prefix_prompt(self):
+        prefix_prompt = ""
+        return prefix_prompt
+    
+    def idelics_hateful_memes_prompt(self, text, label=None) -> str:
+        return f"<visual><human> is an image with: '{text}' written on it. Is it hateful? Answer:{label if label is not None else ''}{'<|endofchunk|>' if label is not None else ''}"
+
+    def idelics_hateful_memes_prefix_prompt(self):
+        prefix_prompt = ""
+        return prefix_prompt
+    
+    def idelics_caption_prompt(self, caption=None) -> str:
+        return f"<visual><human>Provide a short description for this image. <gpt>{caption if caption is not None else ''}{'<|endofchunk|>' if caption is not None else ''}"
+    
+    def idelics_caption_prefix_prompt(self):
+        return ""

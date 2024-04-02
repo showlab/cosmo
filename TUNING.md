@@ -2,6 +2,7 @@
 
 ## Data Preparation
 The only difference between instruction data and normal image-text pairs is design the input.
+Follow [IDELICS](https://huggingface.co/HuggingFaceM4/idefics-80b-instruct), we fine-tuning the model with M3IT, LRV-Instruction, LLaVA-Instruct, SVIT. 
 
 
 ## Format
@@ -27,6 +28,11 @@ Prepare json file with elements looks like:
         ]
     },
 ```
+
+The example of script to process dataset is list in data_preprocess/m3it_preprocess.py.
+
+
+
 
 ## Fine-tuning
 

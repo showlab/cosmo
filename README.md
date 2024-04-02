@@ -4,7 +4,8 @@
 
 [Paper Link](https://arxiv.org/pdf/2401.00849.pdf),
 [Model Link](https://huggingface.co/Awiny),
-[Dataset Link](https://huggingface.co/datasets/Awiny/Howto-Interlink7M)
+[Dataset Link](https://huggingface.co/datasets/Awiny/Howto-Interlink7M),
+[COSMOE LINK](https://fingerrec.github.io/cosmoe)
 
 
 ![](figures/motivation.png)
@@ -16,6 +17,7 @@ Its primary focus lies on In-context Learning.
 ![figures/main_ppl.png](figures/main_ppl.png)
 
 ## News
+- 2/April/2024. The code support trained on MOE (Mixtral 8x7b) model now. See [CosMOE Website](https://fingerrec.github.io/cosmoe) for details.
 - 2/Jan/2024. We provide  the preprocess scripts to prepare the pre-training/downstream dataset.
 - 2/Jan/2024. We release Howto-Interlink7M dataset. See [Huggingface List View](https://huggingface.co/datasets/Awiny/Howto-Interlink7M) for details.
 
@@ -27,9 +29,6 @@ Its primary focus lies on In-context Learning.
 - Incorporates contrastive loss.
 - Enables few-shot evaluation.
 - Supports instruction tuning.
-
-
-
 
 
 ## Model Card
@@ -52,6 +51,31 @@ See [DATASET.md](DATASET.md).
 
 ## Pre-training
 See [PRETRAIN.md](PRETRAIN.md).
+
+
+## Pre-training Cos-MOE(56B)
+
+### Prepare LLM
+Since MOE checkpoint is larger than 200GB which is time consuming to download.
+So it's best to pre-cache in a local directory with tools like AZCopy.
+
+```
+mkdir /tmp/pretrained_models
+cd /tmp/pretrained_models
+git clone https://huggingface.co/mistralai/Mixtral-8x7B-v0.1
+```
+
+### Train
+To reduce GPU memory usage during MOE training, we employ 4-bit training. Ensure 'bitsandbytes' is installed beforehand.
+
+```
+pip install requirements_mistral.txt
+```
+
+```shell
+python src/main_pretrain.py --base_config src/config/train_server/base_180m.yaml --variant_config src/config/train_server/mixtral/ base.yaml --deepspeed src/config/deepspeed/deepspeed_config_mixtral_8x7b.json
+```
+
 
 ## Few-shot Evaluation without Tuning
 

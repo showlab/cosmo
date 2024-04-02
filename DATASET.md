@@ -4,8 +4,8 @@
 |---|---|---|
 |Pre-training|Image-Text|CC3M,LAION400M,DATACOMP1B|
 ||Video-Text|WebVid2.5M|
-||Interleaved Image-Text|CC3M|
-||Interleaved Video-Text|Howto-Interlin7M|
+||Interleaved Image-Text|MMC4|
+||Interleaved Video-Text|Howto-Internlink7M|
 |Few-shot Evaluation|Image Captioning|COCO,FLICKR30K|
 ||Image QA|OK-VQA,VIZWIZ,VQA-V2,TextVQA|
 ||Image Classification|HatefulMems,DataComp|
@@ -48,7 +48,16 @@ data_preprocess/convert_webvid_to_wds.py
 
 ## Interleaved Video-text Data
 
-Download Interleaved Video-text Dataset from [here]().
+Download Interleaved Video-text Dataset from [huggingface dataset](https://huggingface.co/datasets/Awiny/Howto-Interlink7M).
 
 ## Downstream Tasks
 
+
+
+# Pre-training Data for COS-MOE(56B)
+
+
+| Name | Category | Data |
+|---|---|---|
+|Pre-training|Image-Text|subset of {DATACOMP1B,LAION2B}|
+||Interleaved Image-Text|MMC4,OBELICS|

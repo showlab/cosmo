@@ -1,7 +1,7 @@
 einops
 einops-exts
 transformers==4.36.1
-tokenizers==0.13.3
+tokenizers
 pillow
 more-itertools
 datasets
