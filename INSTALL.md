@@ -1,7 +1,7 @@
 # Install
 
 ```
-pip install -r requirement.txt
+pip install -r requirements.txt
 ```
 
 For MISTRAL model, update the transformers and use folloing:
